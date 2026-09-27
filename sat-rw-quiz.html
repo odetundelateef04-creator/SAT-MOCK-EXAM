@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Practice Test #5 — Reading & Writing (Modules 1 & 2)</title>
+<style>
+  :root{
+    --navy:#0f2a4a;
+    --blue:#1a5fb4;
+    --accent:#0b7a75;
+    --bg:#f6f7f9;
+    --card:#ffffff;
+    --line:#e2e5ea;
+    --correct:#1b7a3d;
+    --correct-bg:#e9f7ee;
+    --wrong:#b3261e;
+    --wrong-bg:#fdecea;
+    --text:#1c1f24;
+    --muted:#5c6470;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:28px 20px 22px;
+    text-align:center;
+  }
+  header h1{margin:0 0 4px; font-size:1.4rem;}
+  header p{margin:0; color:#cdd8e8; font-size:0.95rem;}
+  .wrap{max-width:820px; margin:0 auto; padding:20px 16px 80px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px 20px 18px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,0.03);
+  }
+  .module-title{
+    position:sticky; top:0; z-index:5;
+    background:var(--bg);
+    padding:14px 0 8px;
+    font-weight:700;
+    color:var(--navy);
+    font-size:1.15rem;
+    border-bottom:2px solid var(--line);
+    margin-bottom:14px;
+  }
+  .passage{
+    background:#f1f4f8;
+    border-left:3px solid var(--blue);
+    padding:10px 14px;
+    border-radius:6px;
+    font-size:0.92rem;
+    color:#33404f;
+    margin-bottom:10px;
+    white-space:pre-line;
+  }
+  .qnum{
+    display:inline-block;
+    background:var(--navy);
+    color:#fff;
+    font-weight:700;
+    font-size:0.8rem;
+    padding:2px 9px;
+    border-radius:20px;
+    margin-bottom:8px;
+  }
+  .qtext{font-size:1rem; margin-bottom:12px; font-weight:500;}
+  .choices{display:flex; flex-direction:column; gap:8px;}
+  label.choice{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    cursor:pointer;
+    font-size:0.95rem;
+    transition:background .12s, border-color .12s;
+  }
+  label.choice:hover{background:#f1f6fd; border-color:var(--blue);}
+  label.choice input{margin-top:3px; flex-shrink:0;}
+  label.choice .lettxt{flex:1;}
+  label.choice.locked{cursor:default;}
+  label.choice.correct-ans{background:var(--correct-bg); border-color:var(--correct); }
+  label.choice.wrong-ans{background:var(--wrong-bg); border-color:var(--wrong);}
+  .result-tag{
+    display:none;
+    font-size:0.82rem;
+    font-weight:700;
+    margin-top:8px;
+  }
+  .result-tag.show{display:block;}
+  .result-tag.correct{color:var(--correct);}
+  .result-tag.wrong{color:var(--wrong);}
+
+  #submitBar{
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff;
+    border-top:1px solid var(--line);
+    padding:12px 16px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    box-shadow:0 -2px 8px rgba(0,0,0,0.06);
+    z-index:20;
+  }
+  #progressLabel{font-size:0.85rem; color:var(--muted);}
+  #submitBtn{
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    padding:11px 26px;
+    font-size:1rem;
+    font-weight:700;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  #submitBtn:disabled{background:#9fb8d8; cursor:not-allowed;}
+  #submitBtn:hover:not(:disabled){background:#154d94;}
+
+  #scoreCard{
+    display:none;
+    background:linear-gradient(135deg,var(--navy),var(--blue));
+    color:#fff;
+    border-radius:12px;
+    padding:24px 20px;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  #scoreCard.show{display:block;}
+  #scoreCard .big{font-size:2.6rem; font-weight:800; margin:4px 0;}
+  #scoreCard .sub{font-size:0.95rem; color:#dbe6f5;}
+  .modScores{
+    display:flex; justify-content:center; gap:28px;
+    margin-top:14px; flex-wrap:wrap;
+  }
+  .modScores div{font-size:0.9rem;}
+  .modScores b{font-size:1.2rem; display:block;}
+  #retakeBtn{
+    margin-top:16px;
+    background:#fff;
+    color:var(--navy);
+    border:none;
+    padding:9px 18px;
+    border-radius:8px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SAT Practice Test #5</h1>
+  <p>Reading and Writing — Module 1 &amp; Module 2 (66 questions)</p>
+</header>
+
+<div class="wrap">
+  <div id="scoreCard">
+    <div class="sub">YOUR SCORE</div>
+    <div class="big" id="scoreBig">0 / 66</div>
+    <div class="sub" id="scorePct">0%</div>
+    <div class="modScores">
+      <div><b id="m1score">0/33</b>Module 1</div>
+      <div><b id="m2score">0/33</b>Module 2</div>
+    </div>
+    <button id="retakeBtn" onclick="location.reload()">Retake Quiz</button>
+  </div>
+
+  <div id="quizRoot"></div>
+</div>
+
+<div id="submitBar">
+  <span id="progressLabel">0 / 66 answered</span>
+  <button id="submitBtn" onclick="submitQuiz()">Submit Test</button>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+// Each module is an array of questions.
+// choices: array of 4 strings (A-D). answer: index 0-3.
+// passage: optional context text shown above the question.
+
+const module1 = [
+{passage:`The following text is from the 1913 story "The King's Coin" by Emily Pauline Johnson, a Kanienkahagen (Mohawk) writer also known as Tekahionwake. Fox-Foot, a young Ojibwe man, is guiding a group of fur traders who are traveling by canoe and suspects that they are being followed.\n\n"At supper time, Fox-Foot would allow no fire to be built, no landing to be made, no trace of their passing to be left. They ate canned meat and marmalade, drank again of the stream and pushed on, until just at dusk they reached the edge of a long, still lake, with shores of granite and dense fir forest."`,
+q:`As used in the text, what does the word "trace" most nearly mean?`,
+c:["Evidence","Blemish","Amount","Sketch"],a:0},
+
+{passage:`Many ancient sculptures of people's heads are missing their noses. This is because the nose is the most ______ part of a sculpture of a person's head. It is delicate and sticks out from the rest of the sculpture, making it especially easy to break.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["recognizable","fragile","common","sophisticated"],a:1},
+
+{passage:`K.D. Leka and colleagues found that the Sun's corona provides an advance indication of solar flares—intense eruptions of electromagnetic radiation that emanate from active regions in the Sun's photosphere and can interfere with telecommunications on Earth. Preceding a flare, the corona temporarily exhibits increased brightness above the region where the flare is ______.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["antecedent","impending","innocuous","perpetual"],a:1},
+
+{passage:`To demonstrate that the integrity of underground metal pipes can be assessed without unearthing the pipes, engineer Aroba Saleem and colleagues ______ the tendency of some metals' internal magnetic fields to alter under stress: the team showed that such alterations can be measured from a distance and can reveal concentrations of stress in the pipes.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["hypothesized","discounted","redefined","exploited"],a:3},
+
+{passage:`Despite the generalizations about human behavior they have produced, many studies of behavioral psychology have used highly unrepresentative subject pools: students at the colleges and universities where the researchers are employed. To ______ this situation, it is necessary to actively recruit subjects from diverse backgrounds and locations.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["sanction","ameliorate","rationalize","postulate"],a:1},
+
+{passage:`The following text is adapted from Jean Webster's 1912 novel Daddy-Long-Legs. The narrator is a young college student writing letters detailing her weekly experiences.\n\n"[The college is] organizing the Freshman basket-ball team and there's just a chance that I shall make it. I'm little of course, but terribly quick and wiry and tough. While the others are hopping about in the air, I can dodge under their feet and grab the ball."`,
+q:`Which choice best states the main purpose of the text?`,
+c:["To compare basketball with other sports","To provide details of how to play basketball","To state how players will be chosen for the basketball team","To explain why the narrator thinks she might make the basketball team"],a:3},
+
+{passage:`In the late 1800s, Spanish-language newspapers flourished in cities across Texas. San Antonio alone produced eleven newspapers in Spanish between 1890 and 1900. But El Paso surpassed all other cities in the state. This city produced twenty-two newspapers in Spanish during that period. El Paso is located on the border with Mexico and has always had a large population of Spanish speakers. Thus, it is unsurprising that this city became such a rich site for Spanish-language journalism.`,
+q:`Which choice best states the main purpose of the text?`,
+c:["To compare Spanish-language newspapers published in Texas today with ones published there during the late 1800s","To explain that Spanish-language newspapers thrived in Texas and especially in El Paso during the late 1800s","To argue that Spanish-language newspapers published in El Paso influenced the ones published in San Antonio during the late 1800s","To explain why Spanish-language newspapers published in Texas were so popular in Mexico during the late 1800s"],a:1},
+
+{passage:`Chile's Atacama Desert is one of the driest places on Earth. [Underlined:] Mary Beth Wilhelm and other astrobiologists search for life, or its remains, in this harsh place because the desert closely mirrors the extreme environment on Mars. The algae and bacteria found in Atacama's driest regions may offer clues about Martian life. By studying how these and other microorganisms survive such extreme conditions on Earth, Wilhelm's team hopes to determine whether similar life might have existed on Mars and to develop the best tools to look for evidence of it.`,
+q:`Which choice best describes the function of the underlined sentence in the text as a whole?`,
+c:["To contrast the conditions in the Atacama Desert with those on Mars","To explain why many life-forms cannot survive in the Atacama Desert","To indicate why astrobiologists choose to conduct research in the Atacama Desert","To describe certain limitations to conducting scientific study in the Atacama Desert"],a:2},
+
+{passage:`More than 60% of journeys in Mexico City occur via public transit, but simply reproducing a feature of the city's transit system—e.g., its low fares—is unlikely to induce a significant increase in another city's transit ridership. As Erick Guerra et al. have shown, transportation mode choice in urban areas of Mexico is the product of a complex mix of factors, including population density, the spatial distribution of jobs, and demographic characteristics of individuals. System features do affect ridership, of course, but [underlined:] there is an irreducibly contextual dimension of transportation mode choice.`,
+q:`Which choice best describes the function of the underlined portion in the text as a whole?`,
+c:["It presents an objection to the argument of Guerra et al. about transportation mode choice in urban areas of Mexico.","It explains why it is challenging to influence transit ridership solely by altering characteristics of a transit system.","It illustrates the claim that a characteristic associated with high transit ridership in Mexico City is not associated with high transit ridership elsewhere.","It substantiates the assertion that population density, the spatial distribution of jobs, and demographic characteristics are important factors in transportation mode choice."],a:1},
+
+{passage:`Changes to vegetation cover and other human activities influence carbon and nitrogen levels in soil, though how deep these effects extend is unclear. Hypothesizing that differences in land use lead to differences in carbon and nitrogen levels that are not restricted to the topsoil layer (0–30 cm deep), Chukwuebuka Okolo and colleagues sampled soils across multiple land-use types (e.g., grazing land, cropland, forest) within each of several Ethiopian locations. They found, though, that across land-use types, carbon and nitrogen decreased to comparably low levels beyond depths of 30 cm.`,
+q:`Which choice best describes the overall structure of the text?`,
+c:["It describes a phenomenon that scientists do not fully understand, explains a research team's hypothesis about that phenomenon, and then describes a finding that led the team to refine the hypothesis.","It introduces an unresolved scientific question, presents a research team's hypothesis pertaining to that question, and then describes an observation made by the team that conflicts with that hypothesis.","It discusses a process that scientists are somewhat unclear about, introduces competing hypotheses about that process, and then explains how a research team concluded that one of those hypotheses is likely correct.","It explains a hypothesis that has been the subject of scientific debate, discusses how a research team tested that hypothesis, and then presents data the team collected that validate the hypothesis."],a:1},
+
+{passage:`Recently, scientists looked at data collected by NASA's InSight lander to learn more about seismic activity on Mars, known as marsquakes. The data show that the marsquakes all started from the same location on the planet. This discovery was surprising to scientists, as they expected that the marsquakes would originate from all over the planet because of the cooling of the planet's surface. Now, scientists believe that there could be areas of active magma flows deep beneath the planet's surface that trigger the marsquakes.`,
+q:`According to the text, what was surprising to scientists studying the seismic activity data from NASA's InSight lander?`,
+c:["The surface temperature of Mars has been rising.","There were different types of seismic waves causing marsquakes.","NASA's InSight lander collected less data than scientists had expected.","All the marsquakes started from the same location on the planet."],a:3},
+
+{passage:`The ancient writing system used in the Maya kingdoms of southern Mexico and Central America had a symbol for the number zero. The earliest known example of the symbol dates to more than 2,000 years ago. At that time, almost none of the writing systems elsewhere in the world possessed a zero symbol. And the use of zero in Mexico and Central America may be even more ancient. Some historians suggest that Maya mathematicians inherited it from the Olmec civilization, which flourished in the region 2,400–3,600 years ago.`,
+q:`According to the text, what do some historians suggest about Maya civilization?`,
+c:["Maya civilization acquired the use of zero from the Olmec civilization.","Maya civilization respected its historians more than it respected its mathematicians.","Maya civilization was highly secretive about its intellectual achievements.","Maya civilization tried to introduce its writing system to other civilizations."],a:0},
+
+{passage:`"The Bet" is an 1889 short story by Anton Chekhov. In the story, a banker is described as being very upset about something: ______`,
+q:`Which quotation from "The Bet" most effectively illustrates the claim?`,
+c:[`"Then the banker cautiously broke the seals off the door and put the key in the keyhole."`,`"It struck three o'clock, the banker listened; everyone was asleep in the house and nothing could be heard outside but the rustling of the chilled trees."`,`"The banker, spoilt and frivolous, with millions beyond his reckoning, was delighted at the bet."`,`"When [the banker] got home he lay on his bed, but his tears and emotion kept him for hours from sleeping."`],a:3},
+
+{passage:`Partial List of Candidate Species for De-extinction — Huia (Heteralocha acutirostris): became extinct 1907. Caribbean monk seal (Monachus tropicalis): 1952. Passenger pigeon (Ectopistes migratorius): 1914. Saber-toothed cat (Smilodon): 11,000 years before present. Woolly mammoth (Mammuthus primigenius): 6,400 years before present.\n\nThe passage of time is among the many obstacles faced by scientists who are pursuing de-extinction efforts. Specifically, researchers are concerned that the longer a species has been extinct, the less likely it is that a suitable habitat still exists for that species. Among candidate species for de-extinction, this problem would be especially concerning for the ______`,
+q:`Which choice most effectively uses data from the table to complete the statement?`,
+c:["passenger pigeon (Ectopistes migratorius), which became extinct only a few years after the huia (Heteralocha acutirostris).","saber-toothed cat (Smilodon), which became extinct 11,000 years ago.","woolly mammoth (Mammuthus primigenius), which became extinct several thousand years before the saber-toothed cat (Smilodon).","Caribbean monk seal (Monachus tropicalis), which became extinct in 1952."],a:1},
+
+{passage:`"The Yellow Wallpaper" is an 1892 short story by Charlotte Perkins Gilman. In the story, the narrator expresses mixed feelings about her surroundings: ______`,
+q:`Which quotation from "The Yellow Wallpaper" most effectively illustrates the claim?`,
+c:[`"This wallpaper has a kind of sub-pattern in a different shade, a particularly irritating one, for you can only see it in certain lights, and not clearly then."`,`"By moonlight—the moon shines in all night when there is a moon—I wouldn't know it was the same paper."`,`"I'm really getting quite fond of the big room, all but that horrid [wall]paper."`,`"The color is repellant, almost revolting; a smouldering, unclean yellow, strangely faded by the slow-turning sunlight."`],a:2},
+
+{passage:`[Graph: Ratio of Manganese to Calcium in Samples from Alboran Sea and Mauritanian Coast, over ~2,000–20,000 years before present.] The population of the coral Lophelia pertusa declined significantly around 9,000 years ago in the Alboran Sea and around 11,000 years ago near the Mauritanian coast. Using the ratio of manganese to calcium, which inversely correlates with ocean oxygenation levels, marine scientist Rodrigo da Costa Portilho-Ramos and colleagues evaluated whether oxygenation played a role in the declines of L. pertusa. The researchers concluded that oxygenation may have been important in the Alboran Sea but not near the Mauritanian coast, since ______`,
+q:`Which choice most effectively uses data from the graph to complete the statement?`,
+c:["a substantial increase in oxygenation in the Alboran Sea corresponded with the local decline in L. pertusa, but the opposite relationship between oxygenation and L. pertusa was found near the Mauritanian coast.","L. pertusa declined in the Alboran Sea during a period of substantial local decline in oxygenation, but L. pertusa declined near the Mauritanian coast during a period of little local change in oxygenation.","oxygenation in the Alboran Sea was higher before the decline in L. pertusa than after the decline, whereas oxygenation near the Mauritanian coast was relatively low both before and after the decline in L. pertusa.","oxygenation in the Alboran Sea tended to be substantially higher than oxygenation near the Mauritanian coast during the period studied."],a:1},
+
+{passage:`The Younger Dryas was a period of extreme cooling from 11,700 to 12,900 years ago in the Northern Hemisphere. Some scientists argue that a comet fragment hitting Earth brought about the cooling. Others disagree, partly because there is no known crater from such an impact that dates to the beginning of the period. In 2015, a team led by Kurt Kjær detected a 19-mile-wide crater beneath a glacier in Greenland. The scientists who believe an impact caused the Younger Dryas claim that this discovery supports their view. However, Kjær's team hasn't yet been able to determine the age of the crater. Therefore, the team suggests that ______`,
+q:`Which choice most logically completes the text?`,
+c:["it can't be concluded that the impact that made the crater was connected to the beginning of the Younger Dryas.","it can't be determined whether a comet fragment could make a crater as large as 19 miles wide.","scientists have ignored the possibility that something other than a comet fragment could have made the crater.","the scientists who believe an impact caused the Younger Dryas have made incorrect assumptions about when the period began."],a:0},
+
+{passage:`In 2016 biological anthropologist Heather F. Smith and her team investigated the evolution of the appendix, an intestinal organ that is present in some mammals, including humans, but is generally thought to have no function. Studying 533 mammal species, the team found that the appendix has emerged independently across multiple lineages in separate instances and, significantly, hasn't disappeared after emerging in specific lineages. Moreover, the team determined that species with the organ tend to have higher concentrations of lymphoid tissue, which supports immune responses, in the cecum, the organ the appendix is attached to. Therefore, the team hypothesized that the appendix likely ______`,
+q:`Which choice most logically completes the text?`,
+c:["was once present in many nonmammal species but has since disappeared from those lineages.","has been preserved in certain mammal species because it benefits their immune systems.","will emerge in a greater number of mammal species because it may serve a necessary function in the immune system.","produced higher concentrations of lymphoid tissue in mammals in the past than it does currently."],a:1},
+
+{passage:`Some ethicists hold that the moral goodness of an individual's actions depends solely on whether the actions themselves are good, irrespective of the context in which they are carried out. Philosopher L. Sebastian Purcell has shown that surviving works of Aztec (Nahua) philosophy express a very different view. Purcell reveals that these works posit an ethical system in which an individual's actions are judged in light of how well they accord with the individual's role in society and how well they contribute to the community. To the extent that these works are representative of Aztec thought, Purcell's analysis suggests that ______`,
+q:`Which choice most logically completes the text?`,
+c:["the Aztecs would have disputed the idea that the morality of an individual's actions can be assessed by appealing to standards of behavior that are independent of the individual's social circumstances.","the Aztecs would not have accepted the notion that the morality of an individual's actions can be fairly evaluated by people who do not live in the same society as that individual.","actions by members of Aztec society who contributed a great deal to their community could be judged as morally good even if those actions were inconsistent with behaviors the Aztecs regarded as good in all contexts.","similar actions performed by people in different social roles in Aztec society would have been regarded as morally equivalent unless those actions led to different outcomes for the community."],a:0},
+
+{passage:`Lê Lương Minh became the thirteenth secretary-general of the Association of Southeast Asian Nations (ASEAN) in January 2013, making ______ the first time the organization would appoint a Vietnamese leader.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["these","those","this","some"],a:2},
+
+{passage:`In 1929, Edwin Herbert Land invented a polarizing filter that was featured in a number of products, from sunglasses to 3D movies. A decade later, Land ______ his technology to invent the world's first instant camera, the Polaroid Land camera.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["used","to have used","to use","using"],a:0},
+
+{passage:`An online content creator who uses copyrighted songs without permission risks being demonetized (prohibited from including paid advertisements in content). The best way to avoid demonetization is to choose music from the public domain. Using one of these noncopyrighted songs ______ a creator won't lose advertising revenue.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["are ensuring","have ensured","ensure","ensures"],a:3},
+
+{passage:`What makes the theremin a unique musical instrument? You play it without touching it. When you place your ______ the pitch will shift as your hands move through the air.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["hand's between the two antenna's,","hands between the two antennas,","hands' between the two antennas',","hands' between the two antennas,"],a:1},
+
+{passage:`In the music video for the song "We Didn't Start the Fire" by Billy Joel, the singer lists 118 political and cultural references. Such iconic references, cited in rapid and frenetic procession by the musician, who is seated impassively at a dinner table, ______ key moments and personalities of the twentieth century.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["represents","has represented","was representing","represent"],a:3},
+
+{passage:`Long attributed to Jacques-Louis David, the preeminent Neoclassical painter of his day, the 1801 painting Marie Joséphine Charlotte du Val d'Ognes gained fresh attention in the 1990s when art historians discovered that the painting—which depicts a solitary young woman sketching—was actually the work of little-known French portrait ______ Marie-Denise Villers (1774–1821).`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["artist—","artist","artist:","artist,"],a:1},
+
+{passage:`In 1986, conceptual artist Sophie Calle asked twenty-three people, all of whom had been born without sight, to describe "their image of beauty" in rich detail. Calle paired excerpts of these conversations with photographs—both of interviewees and the items they ______ to powerful effect in her exhibition The Blind.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["described, from hair to grass to sculptures","described, from hair to grass to sculptures—","described—from hair to grass to sculptures,","described: from hair to grass to sculptures"],a:1},
+
+{passage:`Celebrated Tewa potter Maria Martinez (1887–1980) made her signature all-black ceramic vessels using a heating technique called reduction firing. This technique involves smothering the flame surrounding the clay vessel. ______ the vessel takes on a shiny, black hue.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["On the contrary,","For example,","Previously,","As a result,"],a:3},
+
+{passage:`Historians agree that the jazz pianist Jelly Roll Morton was exaggerating when he claimed to have invented jazz music. No one can deny, ______ that Morton's innovative compositions and remarkable improvisational skills helped shape jazz as a genre during its early years.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["therefore,","in the second place,","in other words,","though,"],a:3},
+
+{passage:`According to Duverger's law, countries with single-ballot majoritarian elections for single-member districts tend to polarize into two-party systems, wherein dueling political parties consistently dominate the political system. ______ countries with proportional-representation electoral systems tend to support multi-partyism, under which power gets distributed among many political parties.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["Subsequently,","Conversely,","For instance,","In other words,"],a:1},
+
+{passage:`A turtle shell appears external to the animal, protecting its body like armor. ______ the shell is often incorrectly assumed to be an exoskeleton, a rigid outer casing like that of a crustacean or an insect, when in fact it is an endoskeleton, a part of the turtle's internal bone structure, more akin to a spine or a pair of ribs.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["That being said,","However,","For instance,","Hence,"],a:3},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• In 1859, the novel Adam Bede was published in England.\n• According to the novel's title page, the author's name was George Eliot.\n• George Eliot was widely assumed to be a pseudonym.\n• A pseudonym is a fake name used to conceal an author's identity.\n• A woman named Mary Ann Evans later revealed herself as the novel's real author.\n\nThe student wants to identify the real author of Adam Bede.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["The real author of Adam Bede was Mary Ann Evans, who published the novel using the pseudonym George Eliot.","George Eliot, which Adam Bede's title page indicated was the name of the novel's author, was widely assumed to be a pseudonym.","The title page of the novel Adam Bede indicated that the author's name was George Eliot.","A woman who had used a pseudonym to conceal her identity later revealed herself as the real author of Adam Bede."],a:0},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• Scientists have developed a "freeze-thaw" battery that can retain 92% of its charge after twelve weeks.\n• The battery contains molten salt (a type of salt that liquifies when heated and solidifies at room temperature).\n• When the salt is in a liquid state, energy flows through the battery.\n• When the salt is in a solid state, energy stops flowing and is stored in the battery.\n• The stored (frozen) energy can be used by reheating (thawing) the battery.\n\nThe student wants to specify how the salt enables energy storage.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["Scientists have developed a freeze-thaw battery that contains molten salt, which liquifies when heated and solidifies at room temperature.","The stored energy in a freeze-thaw battery, which contains molten salt, can be used by reheating the battery.","When the molten salt in a freeze-thaw battery solidifies at room temperature, energy stops flowing and can be stored in the battery.","Molten salt allows a freeze-thaw battery to retain 92% of its charge after twelve weeks."],a:2},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• The US Fish and Wildlife Service (FWS) keeps a list of all at-risk species.\n• Species on the list are classified as either endangered or threatened.\n• A species that is in danger of extinction throughout most or all of its range is classified as endangered.\n• A species that is likely to soon become endangered is classified as threatened.\n• The California red-legged frog (Rana draytonii) is likely to soon become endangered, according to the FWS.\n\nThe student wants to indicate the California red-legged frog's FWS classification category.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["Species on the FWS list, which includes the California red-legged frog (Rana draytonii), are classified as either endangered or threatened.","The California red-legged frog (Rana draytonii) appears on the FWS list of at-risk species.","According to the FWS, the California red-legged frog is in the endangered category, in danger of extinction throughout most or all of its range.","Likely to soon become endangered, the California red-legged frog is classified as threatened by the FWS."],a:3},
+];
+
+const module2 = [
+{passage:`The following text is adapted from Elizabeth von Arnim's 1922 novel The Enchanted April. Mrs. Wilkins and her friend Rose are traveling in Italy.\n\n"'I'm going to have one of these gorgeous oranges,' said Mrs. Wilkins, staying where she was and reaching across to a black bowl piled with them. 'Rose, how can you resist them. Look—have this one. Do have this beauty—' And she held out a big one."`,
+q:`As used in the text, what does the phrase "reaching across to" most nearly mean?`,
+c:["Joining with","Gaining on","Stretching toward","Arriving at"],a:2},
+
+{passage:`A team of paleontologists has found a rich fossil deposit near Gulgong, Australia. The fossils are so well preserved that the team has been able to ______ detailed information about the life forms that left them behind, such as color patterns and how they interacted with other species.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["occupy","hoard","reserve","obtain"],a:3},
+
+{passage:`According to a team of neuroeconomists from the University of Zurich, ease of decision making may be linked to communication between two brain regions, the prefrontal cortex and the parietal cortex. Individuals tend to be more decisive if the information flow between the regions is intensified, whereas they make choices more slowly when information flow is ______.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["reduced","evaluated","determined","acquired"],a:0},
+
+{passage:`The War of 1812 has ______ place in historical memory in Britain, partly because it is overshadowed by the much larger concurrent conflict against Napoleonic France and partly because it essentially maintained the geopolitical status quo for Britain: the country neither gained nor lost significant territory or position as a result of its participation in the war.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["a tenuous","an enduring","a contentious","a conspicuous"],a:0},
+
+{passage:`Claims about the original significance of Minoan bull-leaping rituals—depicted in paintings and sculptures from the second millennium BCE—are difficult to successfully ______. We know so little about the people archaeologists call the Minoans that assertions about what bull-leaping meant to them will almost inevitably rely on significant speculation and guesswork.`,
+q:`Which choice completes the text with the most logical and precise word or phrase?`,
+c:["imagine","summarize","defend","adjust"],a:2},
+
+{passage:`The following text is adapted from Jerome K. Jerome's 1889 novel Three Men in a Boat (To Say Nothing of the Dog). The narrator is traveling by boat with Harris and another friend.\n\n"[Harris] told us anecdotes of how he had gone across the [English] Channel when it was so rough that the passengers had to be tied into their [beds], and he and the captain were the only two living souls on board who were not ill. Sometimes it was he and the second mate who were not ill; but it was generally he and one other man. [Underlined:] If not he and another man, then it was he by himself."`,
+q:`Which choice best describes the function of the underlined sentence in the text as a whole?`,
+c:["It indicates the reason for Harris's eagerness to resume traveling.","It hints at Harris's feeling that during an earlier boat trip, others didn't include him in activities.","It emphasizes that Harris always boasts about his own constitution when speaking of a previous boat trip.","It reveals that although Harris claims to prefer solitary activities when traveling, he actually enjoys having company."],a:2},
+
+{passage:`[Underlined:] Several studies have found negligible electoral consequences for governments that impose fiscal austerity measures, yet some European governments recently suffered electorally due to their austerity programs. Evelyne Huebscher and colleagues attribute this incongruity to governments' tendency—not followed in the recent European cases—to implement austerity programs strategically to avoid electoral costs (e.g., setting spending cuts to take effect only after the next election), which has obscured the inherent political risks of austerity measures in the election data scholars have examined.`,
+q:`Which choice best describes the function of the underlined sentence in the text as a whole?`,
+c:["It explains a discrepancy between what has been observed in study settings and what has been observed in real-world settings that the text goes on to assert is attributable to the studies not using real-world data.","It identifies a conflict between research findings and recent events that the text goes on to suggest is a consequence of a complicating factor in the data used to generate those findings.","It presents a long-standing divergence in research findings that the text goes on to say is due to different groups of researchers using data that derive from different electoral circumstances.","It describes a recent exception to a general pattern in research findings that the text goes on to explain is a result of researchers underestimating the significance of inconsistencies in the data they've analyzed."],a:1},
+
+{passage:`Text 1: Graphic novels are increasingly popular in bookstores and libraries, but they shouldn't be classified as literature. By definition, literature tells a story or conveys meaning through language only; graphic novels tell stories through illustrations and use language only sparingly, in captions and dialogue. Graphic novels are experienced as series of images and not as language, making them more similar to film than to literature.\n\nText 2: Graphic novels present their stories through both language and images. Without captions and dialogue, readers would be unable to understand what is depicted in the illustrations: the story results from the interaction of text and image. Moreover, Alison Bechdel's Fun Home and many other graphic novels feature text that is as beautifully written as the prose found in many standard novels. Therefore, graphic novels qualify as literary texts.`,
+q:`Based on the texts, how would the author of Text 2 most likely respond to the overall argument presented in Text 1?`,
+c:["By asserting that language plays a more important role in graphic novels than the author of Text 1 recognizes","By acknowledging that the author of Text 1 has identified a flaw that is common to all graphic novels","By suggesting that the story lines of certain graphic novels are more difficult to understand than the author of Text 1 claims","By agreeing with the author of Text 1 that most graphic novels aren't as well crafted as most literary works are"],a:0},
+
+{passage:`The following text is adapted from Ann Petry's 1946 novel The Street. Lutie lives in an apartment in Harlem, New York.\n\n"The glow from the sunset was making the street radiant. The street is nice in this light, [Lutie] thought. It was swarming with children who were playing ball and darting back and forth across the sidewalk in complicated games of tag. Girls were skipping double dutch rope, going tirelessly through the exact center of a pair of ropes, jumping first on one foot and then the other."`,
+q:`Which choice best describes what is happening in the text?`,
+c:["Lutie is observing the appearance of the street at a particular time of day and the events occurring on it.","Lutie is annoyed by the noise of children playing games on her street.","Lutie is puzzled by the rules of certain children's games.","Lutie is spending time alone in her apartment because she doesn't want to interact with her neighbors."],a:0},
+
+{passage:`Since its completion in 2014, Bosco Verticale (Vertical Forest)—a pair of residential towers in Milan, Italy, covered by vegetation—has become a striking symbol of environmental sustainability in architecture. Stefano Boeri intended his design, which features balconies that are home to hundreds of trees, to serve as a model for promoting urban biodiversity. However, the concept has faced skepticism: critics note that although the trees used in Bosco Verticale were specifically cultivated for the project, it's too early to tell if they can thrive in this unusual setting.`,
+q:`According to the text, why are some critics skeptical of the concept behind Bosco Verticale?`,
+c:["Some essential aspects of Bosco Verticale's design are difficult to adapt to locations other than Milan.","The plant life on Bosco Verticale ended up being less varied than Boeri had envisioned it would be.","The construction of Bosco Verticale was no less environmentally damaging than the construction of more conventional buildings is.","It is unclear whether Bosco Verticale can support the plant life included in its design."],a:3},
+
+{passage:`Many literary theorists distinguish between fabula, a narrative's content, and syuzhet, a narrative's arrangement and presentation of events. In the film The Godfather Part II, the fabula is the story of the Corleone family, and the syuzhet is the presentation of the story as it alternates between two timelines in 1901 and 1958. But literary theorist Mikhail Bakhtin maintained that fabula and syuzhet are insufficient to completely describe a narrative—he held that systematic categorizations of artistic phenomena discount the subtle way in which meaning is created by interactions between the artist, the work, and the audience.`,
+q:`Which choice best states the main idea of the text?`,
+c:["Literary theorist Mikhail Bakhtin argued that there are important characteristics of narratives that are not fully encompassed by two concepts that other theorists have used to analyze narratives.","Literary theorist Mikhail Bakhtin claimed that meaning is not inherent in a narrative but is created when an audience encounters a narrative so that narratives are interpreted differently by different people.","The storytelling methods used in The Godfather Part II may seem unusually complicated, but they can be easily understood when two concepts from literary theory are utilized.","Narratives that are told out of chronological order are more difficult for audiences to understand than are narratives presented chronologically."],a:0},
+
+{passage:`[Graph: Total Science Research Submissions by Topic, 2016–2019 — categories: cellular and molecular biology, physics and space science, medicine and health, animal science.] A student is researching the trends in the topics submitted to a national science fair for high school students. The graph shows the number of submissions by topic that were made each year. Based on the data in the graph, the student claims that there were more medicine and health research topics submitted in 2019 than in any other year.`,
+q:`Which choice most effectively uses data from the graph to support the underlined claim?`,
+c:["In 2016, the number of cellular and molecular biology topic submissions was the same as the number of animal science topic submissions.","In 2019, there were more physics and space science topic submissions than there were medicine and health topic submissions.","The lowest number of animal science topic submissions in a year was approximately 95 in 2016.","The highest number of medicine and health topic submissions during the period shown is approximately 285 in 2019."],a:3},
+
+{passage:`Fish whose DNA has been modified to include genetic material from other species are known as transgenic. Some transgenic fish have genes from jellyfish that result in fluorescence (that is, they glow in the dark). Although these fish were initially engineered for research purposes in the 1990s, they were sold as pets in the 2000s and can now be found in the wild in creeks in Brazil. A student in a biology seminar who is writing a paper on these fish asserts that their escape from Brazilian fish farms into the wild may have significant negative long-term ecological effects.`,
+q:`Which quotation from a researcher would best support the student's assertion?`,
+c:[`"In one site in the wild where transgenic fish were observed, females outnumbered males, while in another the numbers of females and males were equivalent."`,`"Though some presence of transgenic fish in the wild has been recorded, there are insufficient studies of the impact of those fish on the ecosystems into which they are introduced."`,`"The ecosystems into which transgenic fish are known to have been introduced may represent a subset of the ecosystems into which the fish have actually been introduced."`,`"Through interbreeding, transgenic fish might introduce the trait of fluorescence into wild fish populations, making those populations more vulnerable to predators."`],a:3},
+
+{passage:`[Bar graph: Modeled Radial Growth of Sugar Maple Trees, with and without nitrogen, under current / moderate change / extreme change climate scenarios.] Inés Ibáñez and colleagues studied a forest site in which some sugar maple trees receive periodic fertilization with nitrogen to mimic the broader trend of increasing anthropogenic nitrogen deposition in soil. Ibáñez and colleagues modeled the radial growth of the trees with and without nitrogen fertilization under three different climate scenarios. Although they found that climate change would negatively affect growth, they concluded that anthropogenic nitrogen deposition could more than offset that effect provided that change is moderate rather than extreme.`,
+q:`Which choice best describes data from the graph that support Ibáñez and colleagues' conclusion?`,
+c:["Growth with nitrogen under the current climate exceeded growth with nitrogen under moderate change, but the latter exceeded growth without nitrogen under extreme change.","Growth without nitrogen under the current climate exceeded growth without nitrogen under moderate change, but the latter exceeded growth with nitrogen under extreme change.","Growth with nitrogen under moderate change exceeded growth without nitrogen under moderate change, but the latter exceeded growth without nitrogen under extreme change.","Growth with nitrogen under moderate change exceeded growth without nitrogen under the current climate, but the latter exceeded growth with nitrogen under extreme change."],a:3},
+
+{passage:`"Poetry" is a 1919 poem by Marianne Moore. The poem highlights an ambivalence toward poetry as the speaker acknowledges its merits while also expressing a sense of displeasure, writing ______`,
+q:`Which quotation from "Poetry" most effectively illustrates the claim?`,
+c:[`"nor is it valid / to discriminate against 'business documents and / school-books'; all these phenomena are important."`,`"One must make a distinction / however: when dragged into prominence by half poets, the result is not / poetry"`,`"when [poems] become so derivative as to become unintelligible, the / same thing may be said for all of us—that we / do not admire what / we cannot understand."`,`"Reading [poetry], however, with a perfect contempt for it, one discovers that there is in / it after all, a place for the genuine."`],a:3},
+
+{passage:`[Table: Simulated Change in Annual Aquifer Input and Irrigation Output if Precipitation Concentration Increases as Climate Models Predict — "somewhat concentrated" baseline: +4.9% water entering aquifers, +0.4% surface water for irrigation, +0.9% groundwater for irrigation; "evenly distributed" baseline: +11.0% water entering aquifers, +9.0% surface water for irrigation, +7.9% groundwater for irrigation.] Some climate models for the western United States predict that while total annual precipitation may remain unchanged, precipitation will become concentrated into fewer but more intense rain and snow events. Geeta Persad and colleagues simulated how the amount of water entering aquifers and used for irrigation would change if this occurred. They concluded that concentration of precipitation into fewer events would result in more irrigation, but that this change in irrigation output is highly sensitive to the baseline concentration of precipitation currently in an area.`,
+q:`Which choice best describes data from the table that support Persad and her colleagues' conclusion?`,
+c:["If baseline precipitation is somewhat concentrated, the amount of water being used for irrigation will increase 0.4% for surface water and 0.9% for groundwater, whereas the amount of water entering aquifers will increase 11.0% if baseline precipitation is evenly distributed.","If baseline precipitation is somewhat concentrated, water use for irrigation will increase only slightly, whereas it will increase 9.0% for surface water and 7.9% for groundwater if baseline precipitation is evenly distributed.","If baseline precipitation is somewhat concentrated, the amount of water entering aquifers will increase 4.9%, while the amount being used for irrigation will increase 0.4% for surface water and 0.9% for groundwater.","If baseline precipitation is somewhat concentrated, water use for irrigation will decline by a small amount, whereas it will increase 11.0% for surface water and 9.0% for groundwater if baseline precipitation is evenly distributed."],a:1},
+
+{passage:`In dialects of English spoken in Scotland, the "r" sound is strongly emphasized when it appears at the end of syllables (as in "car") or before other consonant sounds (as in "bird"). English dialects of the Upland South, a region stretching from Oklahoma to western Virginia, place similar emphasis on "r" at the ends of syllables and before other consonant sounds. Historical records show that the Upland South was colonized largely by people whose ancestors came from Scotland. Thus, linguists have concluded that ______`,
+q:`Which choice most logically completes the text?`,
+c:[`the English dialects spoken in the Upland South acquired their emphasis on the "r" sound from dialects spoken in Scotland.`,`emphasis on the "r" sound will eventually spread from English dialects spoken in the Upland South to dialects spoken elsewhere.`,`the English dialects spoken in Scotland were influenced by dialects spoken in the Upland South.`,`people from Scotland abandoned their emphasis on the "r" sound after relocating to the Upland South.`],a:0},
+
+{passage:`How did whales, once no bigger than seals, evolve to become the largest animals on Earth? Brazilian biologist Mariana Nery believes the answer might be found in whales' DNA. In January 2023, Nery and her colleagues ______ a study showing changes over time in four whale genes associated with body size.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["published","publishing","having published","to publish"],a:0},
+
+{passage:`A harpsichord may look just like a piano, but the difference between the two instruments is easy to hear. When a harpsichord's keys are pressed, the strings inside the ______ are plucked, not struck.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["instrument:","instrument","instrument—","instrument,"],a:1},
+
+{passage:`When they were first introduced to western Europe from Byzantium in the eleventh century, table forks were met with much resistance. The Bishop of Ostia, St. Peter Damian, condemned the eating utensils because he considered ______ dangerous and unnecessary luxury items.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["them","this","that","it"],a:0},
+
+{passage:`Julia Alvarez's 1994 novel In the Time of the Butterflies, a fictionalized account of the lives of the Mirabal ______ can serve as a starting point for those wanting to explore how the rule of dictator Rafael Trujillo has been represented in Dominican American literature.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["sisters, and","sisters and","sisters,","sisters"],a:2},
+
+{passage:`On March 23, 2021, a gust of wind wreaked havoc on global trade. Ever Given, an international shipping container vessel, became lodged in Egypt's Suez Canal, a major shipping route between Europe and Asia. The vessel took six days to ______ it's as heavy as two thousand blue whales when fully loaded.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["dislodge in part due to its sheer size,","dislodge, in part due to its sheer size:","dislodge, in part due to its sheer size,","dislodge, in part, due to its sheer size"],a:1},
+
+{passage:`Fans of the film Moana (2016) may not know that the deep and humorous voice behind the ______ belongs to comedian, actor, and musician Jemaine Clement. The versatile performer has appeared in everything from television commercials to action movies, but voice acting, specifically, has become a notable part of his career.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["character Tamatoa the crab","character Tamatoa the crab,","character: Tamatoa the crab,","character, Tamatoa the crab"],a:0},
+
+{passage:`In her 1983 book The Managed Heart: Commercialization of Human Feeling, sociologist Arlie Russell Hochschild first explored at length her conception of a "sociology of emotions"—the idea that the various cultural and ideological frameworks a person has internalized (class, gender, political affiliation, etc.) ______ each emotional reaction that person has within a situation.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["underlies","is underlying","underlie","has been underlying"],a:2},
+
+{passage:`American abstract artist Richard ______ his installations to make passersby keenly aware of how one's movements are affected by the physical features of one's environment, assembles large-scale steel plates into sculptures that dominate the outdoor spaces they occupy.`,
+q:`Which choice completes the text so that it conforms to the conventions of Standard English?`,
+c:["Serra is intending","Serra, intends","Serra, intending","Serra intends"],a:2},
+
+{passage:`In 1949, Frank Zamboni developed an ice rink resurfacing machine. As Zamboni's machine moved along the rink's surface, it first scraped off the top layer of ice. ______ it sprayed water into the deep grooves left behind by customers' skates. Lastly, it smoothed over the newly formed ice.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["For example,","Next,","Similarly,","In contrast,"],a:1},
+
+{passage:`In 2014, Nestor Gomez won his first-ever storytelling competition, relating a tale about his life as a Guatemalan immigrant living in Chicago. ______ in 2017, Gomez created the show 80 Minutes Around the World as a platform for others to share stories about their immigration experiences.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["Instead,","For example,","Later,","In other words,"],a:2},
+
+{passage:`To guarantee the validity of experimental results, scientists rely on precise, unchanging standards of measurement. ______ metrologists (scientists who study measurement) developed the SI, or International System of Units. The SI's units of measurement are based on unchanging values in nature, such as the mass of an electron or the speed of light.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["In contrast,","Regardless,","In addition,","For this reason,"],a:3},
+
+{passage:`In retrospect, one of the lessons of the 2003 Human Genome Project is that a gene is affected by many factors, not the least of which is its interactions with the protein products of other genes. ______ rather than just focusing on the human genome, efforts to better understand gene mutations related to disease have begun to consider the human proteome, the complete set of proteins expressed by human genes.`,
+q:`Which choice completes the text with the most logical transition?`,
+c:["In other words,","That said,","For example,","Accordingly,"],a:3},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• Iranian scholar Abu Rayhan al-Biruni studied Earth's physical features.\n• He theorized that a large landmass existed west of Europe and east of Asia.\n• Al-Biruni published his landmass theory in 1037 CE.\n\nThe student wants to specify when al-Biruni published his landmass theory.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["In 1037 CE, al-Biruni published his theory that a large landmass existed west of Europe and east of Asia.","Al-Biruni, who studied Earth's physical features, published a theory about a large landmass.","Al-Biruni was an Iranian scholar who studied Earth's physical features.","An Iranian scholar who studied Earth's physical features, al-Biruni theorized that a large landmass existed west of Europe and east of Asia."],a:0},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• In astronomy, the mass of stars can be described in units called solar masses.\n• One solar mass is roughly equal to the mass of the Sun.\n• The mass of the star Proxima Centauri is 0.122 solar masses.\n• The mass of the star Sirius A is 2.063 solar masses.\n\nThe student wants to emphasize the mass of Sirius A.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["The mass of stars, like Proxima Centauri, can be described in units called solar masses.","In astronomy, the mass of stars can be described in units called solar masses, and one solar mass is roughly equal to the mass of the Sun.","The Sun is more massive than Proxima Centauri, which has a mass of 0.122 solar masses.","With a mass of 2.063 solar masses, Sirius A is more massive than the Sun."],a:3},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• A lever is a simple machine consisting of a rigid beam and a fulcrum.\n• The fulcrum is the point about which the beam pivots.\n• The input force (effort) is the force applied to the lever.\n• The output force (load) is the force that the lever exerts on another object.\n• In first-class levers, the fulcrum is located between the effort and the load.\n• In second-class levers, the load is located between the effort and the fulcrum.\n\nThe student wants to contrast first-class levers and second-class levers.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["In levers, the effort is the force applied to the lever; the load, in contrast, is the force that the lever exerts on another object.","In first-class and second-class levers, the fulcrum and the load are in different locations.","First-class levers are simple machines consisting of a rigid beam and a fulcrum, but then again, the same is true of second-class levers.","In first-class levers, the fulcrum is located between the effort and the load, but in second-class levers, the load is located between the effort and the fulcrum."],a:3},
+
+{passage:`While researching a topic, a student has taken the following notes:\n• Earthquakes start at a point called a "focus" and spread out from there as seismic waves.\n• The two types of seismic waves that travel beneath Earth's surface are primary waves (P waves) and secondary waves (S waves).\n• P waves travel more quickly beneath Earth's surface than do S waves.\n• P waves compress and expand the ground, causing it to move backward and forward.\n• S waves cause the ground to move from side to side.\n\nThe student wants to emphasize a similarity between P waves and S waves.`,
+q:`Which choice most effectively uses relevant information from the notes to accomplish this goal?`,
+c:["P waves and S waves both travel beneath Earth's surface, causing the ground to move.","P waves travel away from an earthquake's starting point at a higher rate of speed than do S waves.","Spreading out from the focus of an earthquake, P waves move the ground backward and forward.","Although P waves and S waves start at the same point, they behave very differently."],a:0},
+];
+
+/* ---------- RENDER ---------- */
+const root = document.getElementById('quizRoot');
+const letters = ['A','B','C','D'];
+let totalQ = module1.length + module2.length;
+
+function renderModule(moduleArr, moduleLabel, moduleIdx){
+  const title = document.createElement('div');
+  title.className = 'module-title';
+  title.textContent = moduleLabel;
+  root.appendChild(title);
+
+  moduleArr.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.module = moduleIdx;
+    card.dataset.qindex = i;
+    card.dataset.answer = item.a;
+
+    const num = document.createElement('div');
+    num.className = 'qnum';
+    num.textContent = `Q${i+1}`;
+    card.appendChild(num);
+
+    if(item.passage){
+      const p = document.createElement('div');
+      p.className = 'passage';
+      p.textContent = item.passage;
+      card.appendChild(p);
+    }
+
+    const qt = document.createElement('div');
+    qt.className = 'qtext';
+    qt.textContent = item.q;
+    card.appendChild(qt);
+
+    const choices = document.createElement('div');
+    choices.className = 'choices';
+    item.c.forEach((choiceText, ci) => {
+      const lab = document.createElement('label');
+      lab.className = 'choice';
+      lab.dataset.ci = ci;
+      const inp = document.createElement('input');
+      inp.type = 'radio';
+      inp.name = `m${moduleIdx}q${i}`;
+      inp.value = ci;
+      inp.addEventListener('change', updateProgress);
+      const span = document.createElement('span');
+      span.className = 'lettxt';
+      span.textContent = `${letters[ci]}) ${choiceText}`;
+      lab.appendChild(inp);
+      lab.appendChild(span);
+      choices.appendChild(lab);
+    });
+    card.appendChild(choices);
+
+    const tag = document.createElement('div');
+    tag.className = 'result-tag';
+    card.appendChild(tag);
+
+    root.appendChild(card);
+  });
+}
+
+renderModule(module1, 'Module 1 — Reading and Writing (33 questions)', 0);
+renderModule(module2, 'Module 2 — Reading and Writing (33 questions)', 1);
+
+function updateProgress(){
+  const answered = document.querySelectorAll('.choices input[type=radio]:checked').length;
+  document.getElementById('progressLabel').textContent = `${answered} / ${totalQ} answered`;
+}
+
+function submitQuiz(){
+  const cards = document.querySelectorAll('.card');
+  let correctCount = 0;
+  let m1correct = 0, m2correct = 0;
+  let answeredCount = 0;
+
+  cards.forEach(card => {
+    const modIdx = parseInt(card.dataset.module, 10);
+    const correctIdx = parseInt(card.dataset.answer, 10);
+    const checked = card.querySelector('input[type=radio]:checked');
+    const labels = card.querySelectorAll('.choice');
+    labels.forEach(l => l.classList.add('locked'));
+
+    let userIdx = checked ? parseInt(checked.value, 10) : null;
+    if(userIdx !== null) answeredCount++;
+
+    const tag = card.querySelector('.result-tag');
+    tag.classList.add('show');
+
+    if(userIdx === correctIdx){
+      correctCount++;
+      if(modIdx === 0) m1correct++; else m2correct++;
+      labels[correctIdx].classList.add('correct-ans');
+      tag.textContent = '✓ Correct';
+      tag.classList.add('correct');
+    } else {
+      labels[correctIdx].classList.add('correct-ans');
+      if(userIdx !== null){
+        labels[userIdx].classList.add('wrong-ans');
+      }
+      tag.textContent = userIdx === null ? `✗ Not answered — correct answer: ${letters[correctIdx]}` : `✗ Incorrect — correct answer: ${letters[correctIdx]}`;
+      tag.classList.add('wrong');
+    }
+
+    // disable further input changes
+    card.querySelectorAll('input[type=radio]').forEach(r => r.disabled = true);
+  });
+
+  const pct = Math.round((correctCount/totalQ)*1000)/10;
+  document.getElementById('scoreBig').textContent = `${correctCount} / ${totalQ}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+  document.getElementById('m1score').textContent = `${m1correct}/33`;
+  document.getElementById('m2score').textContent = `${m2correct}/33`;
+  document.getElementById('scoreCard').classList.add('show');
+  document.getElementById('scoreCard').scrollIntoView({behavior:'smooth'});
+
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'Submitted';
+  document.getElementById('progressLabel').textContent = `${answeredCount} / ${totalQ} answered — Test submitted`;
+}
+</script>
+</body>
+</html>
